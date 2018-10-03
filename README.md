@@ -110,7 +110,14 @@ fast setup by the merchants.
 The docker images is currently in our private docker registry and verified merchants will be granted access.
 Once registered you can request access by sending an email to developers@pumapay.io that includes your merchant ID.
 
-Once granted access to the docker registry you can modify the docker-compose file example that can be found in
+Once granted access to the docker registry you can login and pull the docker image from there.
+```
+docker login
+# use your credentials
+docker-compose pull
+```
+
+Once you get the docker image you can modify the docker-compose file example that can be found in
 our [GitHub](https://github.com/pumapayio/server-config-merchant).
 
 2. Docker configuration
