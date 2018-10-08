@@ -7,6 +7,7 @@ The PumaPay Pull Payment protocol allows allows recurring payment to occur over 
     - [PumaPay SDK](#pumapay-sdk)
     - [PumaPay Merchant Backend](#pumapay-merchant-backend)
     - [PumaPay Wallet](#pumapay-wallet)
+    - [PumaPay Faucet](#pumapay-faucet)
 - [Blockchain Components](#blockchain-components)
     - [PumaPay Token](#pumapay-token)
     - [PumaPay Pull Payment](#pumapay-pull-payment)
@@ -34,6 +35,12 @@ PumaPay ecosystem.
 ### PumaPay Wallet
 Wallet allows users who possess PMA to make pull payments with merchants that has registered and are using the
 PumaPay pull payment protocol.
+### PumaPay Faucet
+he faucet is a component that provides test PMA tokens, to development users so that they can test their pull payments
+after they have integrated with the rest of the PumaPay ecosytem. It essentially drip feeds the tokens to users so that
+they have a source of tokens for testing purposes. These test tokens enable testnet users to play with and test the execution
+of their pull payment models on the testnet.
+You can find the PMA faucet [here](https://faucet.pumapay.io/).
 
 ## Blockchain Components
 ### PumaPay Token
@@ -56,6 +63,9 @@ involved with setting the PMA/Fiat rates on the blockchain and eliminate the cus
 cancelling pull payments, which are currently taken care of by PumaPay through the smart contract.
 
 You can find detailed description of the smart contracts dictating the pull payment protocol [here](https://github.com/pumapayio/pumapay-token/).
+
+## PumaPay Wallet
+Sign Pull Payment retrieved by the merchant in the form of QR code.
 
 ## Merchant Backend
 The v2.0 of the PumaPay pull payment protocol on the merchant side consists of a set of APIs that the merchant
@@ -193,5 +203,6 @@ More commands for docker and docker-compose can be found [here](https://docs.doc
 
 #### Server Details
 Your merchant backend server is now running on `http:localhost:3000`
+
 You can check all the available API on `http:localhost:3000/api/v2/doc/api/#`
 
