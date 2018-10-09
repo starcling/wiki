@@ -106,13 +106,15 @@ The first thing that the merchant needs to do is to register through the PumaPay
 [PumaPay Core API Documentation](https://stgcore.pumapay.io/core/api/v2/doc/api/#)
 
 THe main core URL is [https://stgcore/pumapay.io/](https://stgcore/pumapay.io/):
-1.	A merchant can register through `/api/v2/user/register` API call, added to the previous URL and by providing all the relevant details in the API calls body, as specified in the API documentation. On registration the merchant needs to verify the email address.
+1.	A merchant can register through `/api/v2/user/register` API call, added to the previous URL and by providing all the relevant details in the API calls body, as specified in the API documentation. On registration the merchant needs to verify the email address by using the link from the email.
 
     *Please note, that specified password must have at least 1 uppercase letter, at least 1 lowercase, at least 1 number and at least 1 special character.*
 
 2.	By using the email and password used for registration the merchant can login through `/api/v2/login/user` and
 retrieve their `merchantID` and a JSON Web Token (JWT) among other details.
-3.	 The JWT can be used for retrieving the API key from `api/v2/generate-api-key`.
+3.	 The JWT can be used for retrieving the API key from `api/v2/generate-api-key` with token:"received token" as Params.
+
+
 
 **Important:** The `API key` and the `merchantID` **should be noted down** since they will be used later for
 setting up the Merchant NodeJS server.
@@ -123,9 +125,11 @@ For setting up the NodeJS server, PumaPay has a docker image of the merchant bac
 fast setup by the merchants.
 1. Retrieve Merchant Backend Docker image
 The docker image is currently in our private docker registry and verified merchants will be granted access.
-Once registered you can request access by sending an email to developers@pumapay.io that includes your merchant ID.
+Once registered you can request access by sending an email to developers@pumapay.io that includes your merchant ID, and your docker hub username/email.
 
 Once granted access to the docker registry you can login and pull the docker image from there.
+
+* It is important
 ```
 docker login
 # use your credentials
