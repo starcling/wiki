@@ -100,13 +100,16 @@ the executor of the pull payment and for storing the maximum gas used for a pull
 
 ## Merchant Integration Guide
 #### Register with PumaPay as trusted merchant
-The first thing that the merchant needs to do is to register through the PumaPay core APIs with the API call, in order to retrieve their
+The first thing that the merchant needs to do is to register through the PumaPay core APIs with the API call, possibly through Postman, in order to retrieve their
 `API key` and their `merchantID` that is essential for setting up their NodeJS server.
 
 [PumaPay Core API Documentation](https://stgcore.pumapay.io/core/api/v2/doc/api/#)
 
 THe main core URL is [https://stgcore/pumapay.io/](https://stgcore/pumapay.io/):
 1.	A merchant can register through `/api/v2/user/register` API call, added to the previous URL and by providing all the relevant details in the API calls body, as specified in the API documentation. On registration the merchant needs to verify the email address.
+
+    *Please note, that specified password must have at least 1 uppercase letter, at least 1 lowercase, at least 1 number and at least 1 special character.*
+
 2.	By using the email and password used for registration the merchant can login through `/api/v2/login/user` and
 retrieve their `merchantID` and a JSON Web Token (JWT) among other details.
 3.	 The JWT can be used for retrieving the API key from `api/v2/generate-api-key`.
