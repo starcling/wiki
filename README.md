@@ -163,33 +163,46 @@ our [GitHub](https://github.com/pumapayio/server-config-merchant).
 ```
 
 #### Setting up PostgreSQL Database
+Install the PostgreSQL Database, preferably on the separate server, and make sure you have the secure connection to the server running the Node project. Create a user and a database, and add credentials to the docker-compose enviroment variables (`PGHOST, PGUSER, PGPASSWORD, PGDATABASE, PGPORT`).
+
+Grant all privilages to the created user over the database that is going to be used by the backend. 
+
 All the PostgreSQL DB scripts for setting up the PostgreSQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/db).
-By running these scripts you get all the tables needed for the backand to work properly. 
 
-Before runing the script, make sure you created a new user(`PGUSER`) and a new database (`PGDATABASE`) and grant all privilages on the database to the user. It is remomended not to use the root user for this. Also make sure  to edit each script and set the correct `PGUSER`. Than the scripts can be ran one by one or merged into a single script using the tools like Gulp. 
+Before runing the script  make sure  to edit each script and set the correct `PGUSER`. For example: 
+```
+ALTER TABLE public.tb_payment_status
+    OWNER to local_user;
+``` 
+should become
+```
+ALTER TABLE public.tb_payment_status
+    OWNER to your_username;
+```
 
+Than the scripts can be ran one by one or merged into a single script using the tools like Gulp. 
 
-Preferably PostgreSQL should run on a separate server with secure connection to the Node server. The connection details should be added in the docker-compose file (`PGHOST, PGUSER, PGPASSWORD, PGDATABASE, PGPORT`)
+After successfully runing the scripts, you should have the database ready.
 
 #### Setting up MySQL Database
 
-It is recomended not to use the root user, so before initializing the database, please create a user (`KEY_DB_USER`) and a database (`KEY_DB`) which the backend will use. Make sure to grant all the privilages to the new user over the created database. 
+It is recomended not to use the root user.  Before initializing the database, please create a user and add the username to the `KEY_DB_USER` variable in the docker-compose file. After adding the user, create a database, name as you like, and add the database name to the `KEY_DB` variable in the docker-compose file.  Make sure to grant all the privilages to the new user over the created database. 
 
 Preferably mysql instance will run on separate server, that talks to the Node server over secure connection. Connection details of the mysql connection should be included in the docker-compose file (`KEY_DB_HOST, KEY_DB_USER, KEY_DB_PASS, KEY_DB_PORT, KEY_DB`)
 
-Make sure that the mysql version has support to `keyring_file.so` and `keyring_udf.so` plugin as it is used 
-to encrypt the data. 
+Make sure that the mysql version supports `keyring_file.so` and `keyring_udf.so` plugin as it is used to encrypt the data.
 
-All the MySQL DB scripts for setting up the MySQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db).
+After you created the user and the databse, you can run initialization scripts that can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db). Before starting the intialization make sure to replace all occurences of the example user name (`db_service`) with the username you created and used to create the database. You need to change this in all the scripts. After this is done, you can run initialization scripts.
 
-The initalization should be done in the following order. First add the stored procedures from [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db/stored-procedures) than populate initial data by running the scripts from [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db/init)
+The initalization should be done in the following order. 
+* First add stored procedures from [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db/stored-procedures). 
 
-Before runing the scripts, make sure you entered the correct username in the scripts instead of the default ones that are used as an example. 
+* Populate  database by running the scripts from [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db/init)
 
 In order to add the account data the merchant needs to edit  the `/account-db/init/add_data.sql` script and addits own mnemonic and account details. This information is going to be encrypted in the database, so it is recomended that after the server has started you delete the content of these files. 
 
 #### Setting up the Redis instance
-Merchant backend needs to connect to a Redis instance through the host and port provided in the docker-compose file. The instance can be either created on the same server as the Node server, or on a different server instance. Recomended approach is to have all the different tiers running on a separate servers, which means ideally Redis would start on a server that is opened to the server on which the Node project is running. Host and port of the redis instance should be provided in the docker-compose file (`REDIS_PORT` and `REDIS_HOST`). 
+Merchant backend needs to connect to a Redis instance through the host and port provided in the docker-compose file  (`REDIS_PORT` and `REDIS_HOST`). The instance can be either created on the same server as the Node server, or on a different server instance. Recomended approach is to have all the different tiers running on a separate servers, which means ideally Redis would start on a server that is opened to the server on which the Node project is running.  
 
 #### Start docker containers
 Once the merchant backend system (PostgreSQL, MySQL and Redis) is in place you can start the nodeJS server
