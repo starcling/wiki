@@ -11,11 +11,19 @@ The PumaPay Pull Payment protocol allows allows recurring payment to occur over 
 - [Blockchain Components](#blockchain-components)
     - [PumaPay Token](#pumapay-token)
     - [PumaPay Pull Payment](#pumapay-pull-payment)
+- [PumaPay Core](#pumapay-core)
 - [Merchant Backend](#merchant-backend)
     - [NodeJS](#nodejs)
     - [PostgreSQL Database](#postgresql-database)
     - [MySQL Database](#mysql-database)
     - [Redis](#redis)
+    - [HD Wallet](#hd-wallet)
+    - [Funding ETH](#funding-eth)
+    - [Cashing out ETH and PMA](#cashing-out-eth-and-pma)
+- [Pull Payments in detail](#pull-payment-in-detail)
+    - [Pull Payment Models](#pull-payment-models)
+    - [Pull Payment](#pull-payment)
+    - [Pull Payments registration flow](#pull-payments-registration-flow)
 - [Merchant Integration Guide](#merchant-integration-guide)
     - [Register with PumaPay as trusted merchant](#register-with-pumapay-as-trusted-merchant)
     - [Setting up NodeJS Server](#setting-up-nodejs-server)
@@ -37,7 +45,7 @@ Wallet allows users who possess PMA to make pull payments with merchants that ha
 PumaPay pull payment protocol.
 ### PumaPay Faucet
 The faucet is a component that provides test PMA tokens to development users, so that they can test their pull payments
-after they have integrated with the PumaPay ecosytem. It essentially drip feeds the tokens to users so that
+after they have integrated with the PumaPay ecosystem. It essentially drip feeds the tokens to users so that
 they have a source of tokens for testing purposes. These test tokens enable testnet users to play with and test the execution
 of their pull payment models on the testnet.
 You can find the PMA faucet [here](https://faucet.pumapay.io/).
@@ -51,7 +59,7 @@ and deployed on the Ethereum network on our TGE which occurred on May 7th 2018.
 The PumaPay Pull Payment Protocol supports an advanced "pull" mechanism, which allows users to not only push
 tokens from one wallet to another but to also pull funds from other wallets after prior authorization has been given.
 
-Our Pull Payment Protocol currently supports a variety of payment models such as:
+Our Pull Payment Protocol currently supports a variety of pull payment models such as:
 * Single Pull Payment
 * Recurring Pull Payment (Fixed amount)
 * Recurring Pull Payment with initial payment
@@ -64,8 +72,13 @@ cancelling pull payments, which are currently taken care of by PumaPay through t
 
 You can find detailed description of the smart contracts utilizing the pull payment protocol [here](https://github.com/pumapayio/pumapay-token/).
 
-## PumaPay Wallet
-Sign Pull Payment retrieved by the merchant in the form of QR code.
+## PumaPay Core
+The PumaPay Core is our custom framework and heart of our system, which allows the governance, control and utilisation of our pull payment protocol.
+It consists of a set of APIs that allow for the communication between the PumaPay ecosystem components to put the pull payment protocol into action.
+Currently few APIs are publicly available that allow the merchant to register with and retrieve their merchant ID and their API key that will be used
+for secure communication with our core server.
+
+[PumaPay Core API Documentation](https://stgcore.pumapay.io/core/api/v2/doc/api/#)
 
 ## Merchant Backend
 The v2.0 of the PumaPay pull payment protocol on the merchant side consists of a set of APIs that the merchant
@@ -86,24 +99,52 @@ The PostgreSQL database stores the pull payment models, the pull payments and th
 MySQL database is an encrypted database used for encrypting the HD wallet with the Ethereum addresses that the merchant uses on their end
 for executing pull payments on the blockchain, for funding the executor addresses with ETH to pay for gas and cashing
 out PMA and ETH to a bank account on their end.
-
-<!--More details regarding funding can be found [here](funding-eth) and for cashing [here](cashing-out-eth-and-pma).-->
 <!--DB model to be provided-->
 
 ### Redis
 Redis in-memory data structure store is used for storing information related to the executor address that will be
 the executor of the pull payment and for storing the maximum gas used for a pull payment transaction.
 
-<!--### Funding ETH-->
+### HD wallet
+<!-- Explain what an HD-Wallet is - provide links as well -->
+The merchant backend needs to execute pull payments on the Ethereum network. Each payment has a different executor address (merchant address that is allowed to execute a pull payment) since having only one address executing all the pull payments will be very slow if the number of customer and pull payments is high.
+For that same reason, the current version of our protocol does not support multiple pull payments for the same customer address and the same merchant address. Hence we decided to use an HD-Wallet which has unlimited addresses and use a different address for each pull payment.
 
-<!--### Cashing out ETH and PMA-->
+We made a distinction between the address at index 0 (bank account from now on) of the HD-Wallet and the rest of the addresses (executor accounts from now on) in such a way that the bank account will hold most of the ETH and PMA of the HD-Wallet. The ETH from the bank account will be used for funding the executor accounts with enough ETH to pay for the gas fees throughout the whole lifecycle of the pull payment and the PMA will be cashed-out from the executor accounts to the bank account based on the pull payment definition.
+
+### Funding ETH
+Each executor account needs to hold enough ETH to pay for the Ethereum transaction fees (gas) when executing a pull payment. For this reason, whenever a new pull payment is registered on the blockchain the relevant amount of ETH is transferred from the bank account to the executor account.
+<!-- Algorithm to be provided -->
+
+### Cashing out ETH and PMA
+The idea behind funding and cashing out is to keep the most of the funds of the HD-Wallet to one address i.e. bank account. For this reason, we have implemented the cash-out functionality of ETH and PMA from the executor accounts to the bank account.
+The cash-out will take place based on the definition of the pull payment model and more specifically to `automatedCashOut` which needs to be set to `true` and the `cashOutFrequency` which should be a number at least 1 if the `automatedCashOut == true`.
+For example, if `automatedCashOut == true && cashOutFrequency == 1`, it implies that there should be an automated transfer of PMA from the executor account to the bank account after every execution. When the pull payment is finished i.e. all the executions took place, all the PMA and ETH left in the executor account will be transferred to the bank account. The transfer of all the funds of the executor account happens also on pull payment cancellation.
+
+## Pull Payments in detail
+An example of the available APIs that the merchants will have in their disposal after setting up their backend server can be found [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#/)
+
+#### Pull Payment Models
+A merchant can create and manage their payment models within their system. That can be done through the API methods that the merchants have in their backend system.
+#### Pull Payments
+Pull Payments are actual payments or subscriptions that the customer has registered to. Each payment is related with a pull payment model that the merchant has defined.
+
+### Pull Payments registration flow
+A customer can subscribe with a merchant through the following flow:
+1. The merchant needs to create a [pull payment model](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#model-PullPaymentModel) through the API methods that the
+merchants have in their backend system.
+2. The payload for the QR code related with a payment model can be generated through the SDK and can be provided to the customer for scanning it with the PumaPay wallet - relevant API method [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#operations-tag-QR_Payload).
+3. By scanning the QR code from the wallet, the customer will be able to see all the details for that payment as defined in the [pull payment](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#model-PullPayment).
+4. If the customer agrees to subscribe the the pull payment, a new pull payment will be created in the merchant backend linked to the pull payment model.
+5. The wallet signs the registration of the pull payment and send it to the PumaPay core for transmitting the transaction to the blockchain.
+6. Once the core retrieves the transaction hash, it updates the merchant backend which after it retrieves the transaction hash, it monitors until it retrieves the transaction receipt.
+7. If the transaction receipt is a successful one, funding of the executor account takes place and a scheduler is in place to execute the pull payments based on the start time and the frequency of the pull payment.
+8. After all the executions are done the cash-out of ETH and PMA from the executor account to the bank account will take place. Also, any PMA cash-out as defined on the pull payment model will have taken place already.
 
 ## Merchant Integration Guide
 #### Register with PumaPay as trusted merchant
 The first thing that the merchant needs to do is to register through the PumaPay core APIs with the API call, possibly through Postman, in order to retrieve their
 `API key` and their `merchantID` that is essential for setting up their NodeJS server.
-
-[PumaPay Core API Documentation](https://stgcore.pumapay.io/core/api/v2/doc/api/#)
 
 1.	A merchant should register through our core api `/api/v2/user/register`  by providing all the relevant details as specified in
 the API documentation. In the registration response, the merchant will get their `merchantID` that will be used for setting up the Node server.
@@ -253,6 +294,3 @@ Your merchant backend server is now running on `http:localhost:3000`
 You can check all the available APIs on `http:localhost:3000/api/v2/doc/api/#`
 
 As well as the complete PumaPay API V2 calls documentation can be found [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#)
-
-
-
