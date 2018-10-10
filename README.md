@@ -185,8 +185,8 @@ ALTER TABLE public.tb_payment_status
 ```
 
 #### Setting up MySQL Database
-All the MySQL DB scripts for setting up the MySQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db), inside the `init` folder.
-The merchant will need to add their encryption key by executing the following SQL script:
+All the MySQL DB scripts for setting up the MySQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db).
+The merchant will need to add their encryption key to the configuration files inside the `init` folder, by executing the following SQL script:
 ```sql
 call add_table_keys('ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
 ```
