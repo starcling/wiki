@@ -73,7 +73,7 @@ can use to connect to the rest of the PumaPay ecosystem.
 All the relevant functionality is provided by the PumaPay [merchant SDK](https://github.com/pumapayio/merchant.sdk).
 
 ### NodeJS
-The NodeJS server uses the merchant SDK as a singleton and provides a list of API that are used to write their own
+The NodeJS server uses the merchant SDK as a singleton and provides a list of API methods that are used to write their own
 pull payment models, to register the pull payments of their customers as well as executing and to monitor the
 blockchain transactions related with the pull payments.
 
@@ -91,7 +91,8 @@ out PMA and ETH to a bank account on their end.
 
 ### Redis
 Redis in-memory data structure store is used for storing information related with which executor address will be
-the executor of the pull payment and for storing the maximum gas used for a pull payment transaction.
+the executor of the pull payment and for storing the maximum gas used for a pull payment transaction.  It is also used in few other places where the server needs to store the references to the wallet address and speed up the processing of blockchain transactions. 
+
 
 <!--### Funding ETH-->
 
@@ -104,11 +105,11 @@ The first thing that the merchant needs to do is to register through the PumaPay
 
 [PumaPay Core API Documentation](https://stgcore.pumapay.io/core/api/v2/doc/api/#)
 
-1.	A merchant can register through `/api/v2/user/register` API by providing all the relevant details as specified in
-the API documentation. On registration the merchant needs to verify their email address.
-2.	By using the email and password used for registration the merchant can login through `/api/v2/login/user` and
-retrieve their `merchantID` and a JSON Web Token (JWT) among other details.
-3.	 The JWT can be used for retrieving the API key from `api/v2/generate-api-key`.
+1.	A merchant should register through our core api `/api/v2/user/register`  by providing all the relevant details as specified in
+the API documentation. In the registration response, the merchant will get their `merchantID` that will be used for setting up the Node server. It is important to make note of the `merchantID`. The merchant will also receive an email with a verification link that is used to verify the email address. 
+2.	After the email verification, the merchant should login to the core `/api/v2/login/user` by using the email and password. The login return thes 
+merchant's `pma-user-token` that should be used to access the `API key`.
+3.	 The `pma-user-token` needs to be added to the header of the `API key` request `api/v2/generate-api-key`. The response gives the `pma-api-key` that is used to communicate to the core server from the backend server. 
 
 **Important:** The `API key` and the `merchantID` should be noted down since they will be used later on for
 setting up the Merchant NodeJS server.
@@ -127,7 +128,7 @@ docker login
 docker-compose pull
 ```
 
-Once you get the docker image you can modify the docker-compose file example that can be found in
+Once you get the docker image you should modify the docker-compose file example that can be found in
 our [GitHub](https://github.com/pumapayio/server-config-merchant).
 
 2. Docker configuration
@@ -162,33 +163,36 @@ our [GitHub](https://github.com/pumapayio/server-config-merchant).
 ```
 
 #### Setting up PostgreSQL Database
-All the PostgeSQL DB scripts for setting up the PostgreSQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/db).
+All the PostgreSQL DB scripts for setting up the PostgreSQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/db).
+By running these scripts you get all the tables needed for the backand to work properly. 
 
-The SQL scripts can run as provided but it is highly recommended that database user is changed according the
-PostgeSQL database that the merchant has setup.
-Example:
-```sql
-ALTER TABLE public.tb_payment_status
-    OWNER to local_user;
-## Should change to
-ALTER TABLE public.tb_payment_status
-    OWNER to user_specified_in_docker_compose_file;
-```
+Before runing the script, make sure you created a new user(`PGUSER`) and a new database (`PGDATABASE`) and grant all privilages on the database to the user. It is remomended not to use the root user for this. Also make sure  to edit each script and set the correct `PGUSER`. Than the scripts can be ran one by one or merged into a single script using the tools like Gulp. 
+
+
+Preferably PostgreSQL should run on a separate server with secure connection to the Node server. The connection details should be added in the docker-compose file (`PGHOST, PGUSER, PGPASSWORD, PGDATABASE, PGPORT`)
 
 #### Setting up MySQL Database
+
+It is recomended not to use the root user, so before initializing the database, please create a user (`KEY_DB_USER`) and a database (`KEY_DB`) which the backend will use. Make sure to grant all the privilages to the new user over the created database. 
+
+Preferably mysql instance will run on separate server, that talks to the Node server over secure connection. Connection details of the mysql connection should be included in the docker-compose file (`KEY_DB_HOST, KEY_DB_USER, KEY_DB_PASS, KEY_DB_PORT, KEY_DB`)
+
+Make sure that the mysql version has support to `keyring_file.so` and `keyring_udf.so` plugin as it is used 
+to encrypt the data. 
+
 All the MySQL DB scripts for setting up the MySQL database can be found [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db).
-The merchant will need to add their encryption key by executing the following SQL script:
-```sql
-call add_table_keys('ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
-```
-In addition the merchant needs to add their mnemonic phrase of their HD wallet.
-Note that the mnemonicID should be the same as specified in the docker compose file.
-```sql
-CALL add_mnemonic('mnemonic_phrase_id', 'test test test test test test test test test test test test', 'ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
-```
+
+The initalization should be done in the following order. First add the stored procedures from [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db/stored-procedures) than populate initial data by running the scripts from [here](https://github.com/pumapayio/server-config-merchant/tree/master/resources/account-db/init)
+
+Before runing the scripts, make sure you entered the correct username in the scripts instead of the default ones that are used as an example. 
+
+In order to add the account data the merchant needs to edit  the `/account-db/init/add_data.sql` script and addits own mnemonic and account details. This information is going to be encrypted in the database, so it is recomended that after the server has started you delete the content of these files. 
+
+#### Setting up the Redis instance
+Merchant backend needs to connect to a Redis instance through the host and port provided in the docker-compose file. The instance can be either created on the same server as the Node server, or on a different server instance. Recomended approach is to have all the different tiers running on a separate servers, which means ideally Redis would start on a server that is opened to the server on which the Node project is running. Host and port of the redis instance should be provided in the docker-compose file (`REDIS_PORT` and `REDIS_HOST`). 
 
 #### Start docker containers
-Once the merchant backend system is in place you can start the nodeJS server
+Once the merchant backend system (PostgreSQL, MySQL and Redis) is in place you can start the nodeJS server
 ```
 # Start the node js server
 docker-compose up -d
