@@ -36,10 +36,10 @@ The PumaPay Pull Payment protocol allows recurring payment to occur over the Eth
 The core is our custom framework and heart of our system.
 Our PumaPay Core allows the governance, control and utilisation of our pull payment protocol.
 ### PumaPay SDK
-The SDK module gives functionality to any third party integrator to allow execution of pull payments.
+The SDK module gives functionality to any third party integrator to allow execution of pull payments as well as other utility methods.
 ### PumaPay Merchant Backend
 The Merchant backend consists of a set of APIs that the merchant can use to connect to the rest of the
-PumaPay ecosystem.
+PumaPay ecosystem. It also allows the merchant to have an overview of payment models and payments.
 ### PumaPay Wallet
 Wallet allows users who possess PMA to make pull payments with merchants that have registered and are using the
 PumaPay pull payment protocol.
