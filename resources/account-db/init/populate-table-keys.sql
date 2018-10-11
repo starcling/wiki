@@ -1,1 +1,1 @@
-call add_table_keys('sUp4hS3cr37kE9c0D3');
+call add_table_keys('server_secret_needs_to_change');
