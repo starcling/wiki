@@ -151,8 +151,9 @@ the API documentation. In the registration response, the merchant will get their
 It is important to make note of the `merchantID`. The merchant will also receive an email with a verification link that is used to verify the email address.
 
 *Please note, that specified password must have at least 1 uppercase letter, at least 1 lowercase, at least 1 number and at least 1 special character.*
-2.	After the email verification, the merchant should login to the core `/api/v2/login/user` by using the email and password. The login return thes
-merchant's `pma-user-token` that should be used to access the `API key`.
+
+2.	After the email verification, the merchant should login to the core `/api/v2/login/user` by using the email and password. The login return the merchant's `pma-user-token` that should be used to access the `API key`.
+
 3.	 The `pma-user-token` needs to be added to the header of the `API key` request `api/v2/generate-api-key`.
 The response gives the `pma-api-key` that is used to communicate to the core server from the backend server.
 
