@@ -93,7 +93,7 @@ blockchain transactions related with the pull payments.
 ### PostgreSQL Database
 The PostgreSQL database stores the pull payment models, the pull payments and the Ethereum transactions.
 
-![Merchant Backend Database](resources/MerchantBackendDB.png)
+![Merchant Backend Database](assets/MerchantBackendDB.png)
 
 ### MySQL Database
 MySQL database is an encrypted database used for encrypting the HD wallet with the Ethereum addresses that the merchant uses on their end
@@ -175,8 +175,8 @@ docker login
 docker-compose pull
 ```
 
-Once you get the docker image you should modify the docker-compose file example that can be found in
-our [GitHub](https://github.com/pumapayio/server-config-merchant).
+Once you get the docker image you should modify the docker-compose example file that can be found in
+our [here](resources).
 
 2. Docker configuration
 ```
