@@ -22,7 +22,7 @@ The PumaPay Pull Payment protocol allows recurring payment to occur over the Eth
     - [Cashing out ETH and PMA](#cashing-out-eth-and-pma)
 - [Pull Payments in detail](#pull-payment-in-detail)
     - [Pull Payment Models](#pull-payment-models)
-    - [Pull Payment](#pull-payment)
+    - [Pull Payments](#pull-payments)
     - [Pull Payments registration flow](#pull-payments-registration-flow)
 - [Merchant Integration Guide](#merchant-integration-guide)
     - [Register with PumaPay as trusted merchant](#register-with-pumapay-as-trusted-merchant)
