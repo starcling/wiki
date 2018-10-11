@@ -1,6 +1,8 @@
 # PumaPay Pull Payment Protocol Wiki
 The PumaPay Pull Payment protocol allows recurring payment to occur over the Ethereum Blockchain.
 
+**Please note that this wiki is still under review and maybe modified.**
+
 ## Table of content
 - [Ecosystem Components](#ecosystem-components)
     - [PumaPay Core](#pumapay-core)
