@@ -25,9 +25,9 @@ The PumaPay Pull Payment protocol allows recurring payment to occur over the Eth
         - [PostgreSQL Database](#postgresql-database)
         - [MySQL Database](#mysql-database)
         - [Redis](#redis)
-- [Pull Payments in detail](#pull-payment-in-detail)
+- [Pull Payments in detail](#pull-payments-in-detail)
     - [Billing models](#billing-models)
-    - [PullPayment](#pullpayment)
+    - [Pull Payments](#pull-payments)
     - [Pull Payments registration flow](#pull-payments-registration-flow)
 - [Merchant Integration Guide](#merchant-integration-guide)
     - [Register with PumaPay as trusted merchant](#register-with-pumapay-as-trusted-merchant)
@@ -162,9 +162,9 @@ executing the PullPayment and for storing the maximum gas used for a PullPayment
 ## Pull Payments in detail
 An example of the available APIs that the merchants will have in their disposal after setting up their backend server can be found [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#/)
 
-#### Billing Models
+### Billing Models
 A merchant can create and manage their billing models within their system. That can be done through the API methods that the merchants have in their backend system.
-#### Pull Payments
+### Pull Payments
 PullPayments are actual payments or subscriptions that the customer has registered to. Each PullPayment is related with a billing model that the merchant has defined.
 
 ### Pull Payments registration flow
