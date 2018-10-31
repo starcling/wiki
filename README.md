@@ -85,7 +85,7 @@ It consists of a set of APIs that allow for the communication between the PumaPa
 Currently few APIs are publicly available that allow the merchant to register with and retrieve their merchant ID and their API key that will be used
 for secure communication with our core server.
 
-[PumaPay Core API Documentation](https://stgcore.pumapay.io/core/api/v2/doc/api/#)
+[PumaPay Core API Documentation](https://precore.pumapay.io/api/v2/doc/api/#)
 
 ## Merchant Backend
 The v2.0 of the PumaPay PullPayment protocol on the merchant side consists of a set of APIs that the merchant
@@ -160,7 +160,7 @@ Redis in-memory data structure store is used for storing information related to 
 executing the PullPayment and for storing the maximum gas used for a PullPayment transaction.
 
 ## Pull Payments in detail
-An example of the available APIs that the merchants will have in their disposal after setting up their backend server can be found [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#/)
+An example of the available APIs that the merchants will have in their disposal after setting up their backend server can be found [here](https://prembackend.pumapay.io/api/v2/doc/api/#)
 
 ### Billing Models
 A merchant can create and manage their billing models within their system. That can be done through the API methods that the merchants have in their backend system.
@@ -190,16 +190,26 @@ It is important to make note of the `merchantID`. The merchant will also receive
 
 *Please note, that specified password must have at least 1 uppercase letter, at least 1 lowercase, at least 1 number and at least 1 special character.*
 
-2.	After the email verification, the merchant should login to the core `/api/v2/login/user` by using the email and password. 
+2.	After the email verification, the merchant should login to the core `/api/v2/login/user` by using the email and password.
 The login return thes
 merchant's `pma-user-token` that should be used to access the `API key`.
 
 3.	 The `pma-user-token` needs to be added to the header of the `API key` request `api/v2/generate-api-key`.
 The response gives the `pma-api-key` that is used to communicate to the core server from the backend server.
 
+#### KYC Procedure
+To become fully authorised merchant, you need to go through the KYC procedure. After registration and verification of your email address, an email will be sent describing our KYC procedure in detail and requesting the relevant documents.
+Please make sure to encrypt all of your documents before sending and provide us with the decryption key.
+The encryption/decryption tool we suggest is PGP Desktop.
+Please send the encrypted list of required documents to kyc@pumapay.io
+
+##### Verification process
+1.	We are running the documents through our internal Verification process
+2.	Once approved, we are changing the Merchant’s status to Verified
+3.	Merchant can continue and receives API keys.
+
 **Important:** The `API key` and the `merchantID` **should be noted down** since they will be used later for
 setting up the Merchant NodeJS server.
-
 
 #### Setting up NodeJS Server
 For setting up the NodeJS server, PumaPay has a docker image of the merchant backend that can be used for easy and
@@ -207,7 +217,7 @@ fast setup by the merchants.
 
 1. Retrieve Merchant Backend Docker image
 The docker image is currently in our private docker registry and verified merchants will be granted access.
-Once registered you can request access by sending an email to developers@pumapay.io that includes your merchant ID, and your docker hub username/email.
+Once registered you can request access by sending an email to docker@pumapay.io that includes your merchant ID, and your docker hub username/email.
 
 Once granted access to the docker registry you can login and pull the docker image from there.
 
@@ -333,4 +343,8 @@ Your merchant backend server is now running on `http:localhost:3000`
 
 You can check all the available APIs on `http:localhost:3000/api/v2/doc/api/#`
 
-As well as the complete PumaPay API V2 calls documentation can be found [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#)
+
+
+The complete PumaPay API V2 calls documentation [here](assets/PumaPayMerchantBackendAPIGuide.pdf) and the swagger version of it [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#).
+
+Extended integration guide can be found [here](assets/PumaPayMerchantIntegrationGuide.pdf).
