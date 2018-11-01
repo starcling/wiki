@@ -1,0 +1,17 @@
+{
+  "name": "puma-pay-encryption-module",
+  "version": "1.0.0",
+  "description": "Helper module for encrypting private keys using the AWS KMS",
+  "main": "index.js",
+  "scripts": {
+    "encrypt": "export AWS_PROFILE=pre-prod-core-test-iam && rm -f decrypted_keys/preprod_core_test_encrypted_keys.txt && node index.js >> decrypted_keys/preprod_core_test_encrypted_keys.txt"
+  },
+  "author": "PumPay",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.336.0",
+    "crypto": "^1.0.1",
+    "dotenv": "^6.1.0",
+    "node-env": "^0.1.6"
+  }
+}

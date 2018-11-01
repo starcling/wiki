@@ -1,0 +1,29 @@
+Starting encryption for pre-prod-core-test-iam profile
+Error encrypting the private keys, There were 2 validation errors:
+* MissingRequiredParameter: Missing required key 'KeyId' in params
+* MissingRequiredParameter: Missing required key 'Plaintext' in params
+Error encrypting the mnemonic There were 2 validation errors:
+* MissingRequiredParameter: Missing required key 'KeyId' in params
+* MissingRequiredParameter: Missing required key 'Plaintext' in params
+Encrypted data: 
+
+Profile: PRE-PROD-CORE-TEST-IAM
+
+******************************************************************
+
+PrivateKey: undefined
+
+AddAccount call: 
+
+CALL add_account('undefined', 'undefined');
+
+------------------------------------------------------------------
+
+Mnemonic: undefined
+
+AddMnemonic call: 
+
+CALL add_mnemonic('undefined', 'undefined');
+
+******************************************************************
+  
