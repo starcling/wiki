@@ -252,7 +252,7 @@ QR Code is used by the wallet in order to initiate the PullPayment. There are th
 2. generateEthPushQRCode - Method for creating a QR Code payload for Ethereum push transactions
 3. generateErc20PushQRCode - Method for creating a QR Code payload for ERC20 push transactions
 
-These methods return a JSON payload, and it is up to the frontend application or the UI merchant is using to display a QR image. These are proposed libraries from npm package [qr-image](https://www.npmjs.com/package/qr-image), [qrcode](https://www.npmjs.com/package/qrcode).
+These methods return a JSON payload, and it is up to the frontend application or the UI merchant is using to display a QR image. These are proposed libraries from npm package [qr-image](https://www.npmjs.com/package/qr-image), [qrcode](https://www.npmjs.com/package/qrcode). For more detailed description of the methods check out our [merchant SDK](https://github.com/pumapayio/merchant.sdk#sdkgenerateqrcode) 
 
 
 ### Technical Components
