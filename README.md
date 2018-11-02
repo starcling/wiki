@@ -238,7 +238,7 @@ our [here](resources).
 - CORE_API_URL=https://stgcore.pumapay.io/core  # PumaPay core URL
 - MERCHANT_URL=http://localhost:3000            # Merchant server URL
 - PGHOST=postgres_merchant                      # PostgreSQL db host
-- PGUSER=backend_user                             # PostgreSQL db user
+- PGUSER=backend_user                           # PostgreSQL db user
 - PGPASSWORD=db_pass                            # PostgreSQL db password
 - PGDATABASE=backend_db                         # PostgreSQL db name
 - PGPORT=5432                                   # PostgreSQL db port
@@ -247,8 +247,8 @@ our [here](resources).
 - REDIS_TOKEN=123456789                         # Redis token - AWS Setup
 - ETH_NETWORK=3                                 # Ethereum network - 3 for testnet / 1 for mainnet
 - KEY_DB_HOST=db_host                           # MySQL db host
-- KEY_DB_USER=keys_user                           # MySQL db user
-- KEY_DB_PASS=_pass                           # MySQL db password
+- KEY_DB_USER=keys_user                         # MySQL db user
+- KEY_DB_PASS=_pass                             # MySQL db password
 - KEY_DB=keys_db                                # MySQL db name
 - KEY_DB_PORT=3306                              # MySQL db port
 - MNEMONIC_ID=mnemonic_phrase_id                # Mnemonic phrase ID - as stored in MySQL db from the SQL script
@@ -259,6 +259,11 @@ our [here](resources).
 - BALANCE_CHECK_EMAIL_PROD=test@test.test       # Receiver email for the balance checker - production environment
 - CORE_API_KEY=API_KEY_RETRIEVED_FROM_CORE      # API key retrieved after registering to PumaPay core server
 - MERCHANT_ID=MERCHANT_ID_RETRIEVED_FROM_CORE   # Merchant ID as retrieved from PumaPay core after registration
+- AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID           # Used to authenticate to AWS KMS api
+- AWS_SECRET_ACCESS_KEY=AWS_ACCESS_SECRET       # AWS accesss secred, used to authenticate to AWS KMS api
+- AWS_REGION=AWS_REGION                         # Region used to create encryption key
+- ENCRYPTION_MODULE=aws                         # By setting this value to aws, you tell to the server to use AWS for decrypting data, using none assumes no encryption is present and will use data as received from the db. 
+- AWS_KEY_ID=AWS_KEY_ID                         # ID of the key used to encrypt mnemonic
 ```
 
 #### Setting up PostgreSQL Database
@@ -307,6 +312,9 @@ Login to the with database using `keys_user` and run the following command:
 CALL add_mnemonic('mnemonic_phrase', 'encrypted_mnemonic');
 ```
 Replace `mnemonic_phrase` with value defined in the docker-compose file (`MNEMONIC_ID`) and `encrypted_mnemonic` with the value created by the [encryption tool](resources/encryption-tool). 
+
+In order to use the encrypted data in the backend server, we need to let the server know the encryption mechanism we used to encrypt the mnemonic and private keys. In the encryption procedure we used the AWS KMS encryption keys for encrypting the data. We need to pass key information to the server by adding appropriate values to the docker-compose file. Please make sure to add correct values to  `AWS_ACCESS_KEY_ID`,`AWS_SECRET_ACCESS_KEY=AWS_ACCESS_SECRET` `AWS_REGION`, `ENCRYPTION_MODULE` and `AWS_KEY_ID`. You find more information about connecting to AWS and using the AWS encryption keys [here](https://aws.amazon.com/sdk-for-node-js/) and [here]()
+```
 
 #### Setting up the Redis instance
 Merchant backend needs to connect to a Redis instance through the host and port provided in the docker-compose file  (`REDIS_PORT` and `REDIS_HOST`).
