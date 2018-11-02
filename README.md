@@ -152,9 +152,45 @@ beneficiaryAddress - Ethereum address of the merchant that is executing the Pull
 paymentID - ID of the PullPayment that is related with the merchant.
 
 #### Scheduler
-Scheduler is responsible for executing PullPayments on a *frequency* specified when creating a PullPayment model. The class itself is a mixture of a `cron-job` based library [node-schedule](https://www.npmjs.com/package/node-schedule) and integrated `setInterval` javascript methods. When the `start()` method is called (explained methods and how they work in our [merchant SDK] (https://github.com/pumapayio/merchant.sdk) git), a `cron-job` is scheduled to start based on a `startTimestamp` defined in the PullPayment. When the time comes for the PullPayment to be executed `executePullPayment()` method is called. After the execution is done a `setInterval` is initiated that calls `executePullPayment()` method with the *frequency* interval basis.
+Scheduler is responsible for executing PullPayments on a *frequency* specified when creating a PullPayment model. The class itself is a mixture of a `cron-job` based library [node-schedule](https://www.npmjs.com/package/node-schedule) and integrated `setInterval` javascript methods. When the `start()` method is called (explained methods and how they work in our [merchant SDK] (https://github.com/pumapayio/merchant.sdk) git), a `cron-job` is scheduled to start based on a `startTimestamp` defined in the PullPayment. When the time comes for the PullPayment to be executed `executePullPayment()` method is called. After the execution is done a `setInterval` is initiated that calls `executePullPayment()` method on the *frequency* interval basis.
 
 #### PullPayment Execution
+Upon execution, first the PullPayment details are retrieved from the merchant database based on `paymentID`. Then we begin to construct the transaction. 
+
+The transaction count is retrieved from blockchain for *merchantAddress*
+```
+const txCount: number = await blockchainHelper.getTxCount(pullPayment.merchantAddress);
+```
+The data for the transaction is the encoded *executePullPayment* method, where the `contract` is our PumaPayPullPayment contract.
+```
+const data: string = contract.methods.executePullPayment(pullPayment.customerAddress, pullPayment.id).encodeABI();
+```
+Gas limit is calculated based on the previous executions
+```
+const gasLimit = await new FundingController().calculateMaxExecutionFee(pullPayment.pullPaymentAddress);
+```
+The `privateKey` for the *merchantAddress* is retrieved from the `getPrivateKey(address)` callback provided by the merchant. Then the transaction is signed using the privateKey 
+```
+let privateKey: string = (await DefaultConfig.settings.getPrivateKey(pullPayment.merchantAddress)).data[0]['@accountKey'];
+const serializedTx: string = await new RawTransactionSerializer(data, pullPayment.pullPaymentAddress, txCount, privateKey, Math.ceil(gasLimit * 1.3)).getSerializedTx();
+privateKey = null;
+        
+public getSerializedTx(): string {
+    const rawTx = {
+        gasPrice: DefaultConfig.settings.web3.utils.toHex(DefaultConfig.settings.web3.utils.toWei('10', 'Gwei')),
+        gasLimit: DefaultConfig.settings.web3.utils.toHex(this.limit),
+        to: this.contractAddress,
+        value: '0x00',
+        data: this.data,
+        nonce: this.txCount
+    };
+    const tx = new TX(rawTx);
+    tx.sign(this.privateKey);
+    this.privateKey = null;
+
+    return '0x' + tx.serialize().toString('hex');
+}
+```
 
 ### Technical Components
 #### NodeJS
