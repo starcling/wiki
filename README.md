@@ -23,6 +23,7 @@ The PumaPay Pull Payment protocol allows recurring payment to occur over the Eth
         - [Blockchain Event Listener](#blockchain-event-listener)
         - [Scheduler](#scheduler)
         - [PullPayment Execution](#pullpayment-execution)
+        - [QR Code](#qr-code)
     - [Technical Components](#technical-components)
         - [NodeJS](#nodejs)
         - [PostgreSQL Database](#postgresql-database)
@@ -193,7 +194,7 @@ public getSerializedTx(): string {
 ```
 When the transaction is constructed we send the signed transaction to the blockchain and subscribe to the *transactionHash* and *receipt* events.
 
-1. Upon receiving *transactionHash* 
+1. Upon receiving *transactionHash* -
 This means that the transaction is pending on the blockchain. Then a local blockchain-transaction is created in merchant's database using the callback method provided to the SDK. We do this to have a lookup database for the blockchain transactions for faster querying.
 ```
 await transactionController.createTransaction(<ITransactionInsert>{
@@ -203,7 +204,7 @@ await transactionController.createTransaction(<ITransactionInsert>{
     timestamp: Math.floor(new Date().getTime() / 1000)
 });
 ```
-2. Upon receiving *receipt* 
+2. Upon receiving *receipt* -
 This means that the transaction is either completed or reverted on the blockchain. We check if the *receipt.status* is true and reduce *numberOfPayments*, adjust *lastPaymentDate* and *nextPaymentDate* set the status and update the PullPayment and the blockchain-transaction.
 
 ```
@@ -244,6 +245,8 @@ if (pullPayment.automatedCashOut && receipt.status) {
     await new CashOutController().cashOutPMA(pullPaymentID);
 }
 ```
+
+### QR Code 
 
 ### Technical Components
 #### NodeJS
