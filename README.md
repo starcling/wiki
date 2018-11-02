@@ -193,15 +193,56 @@ public getSerializedTx(): string {
 ```
 When the transaction is constructed we send the signed transaction to the blockchain and subscribe to the *transactionHash* and *receipt* events.
 
-Upon receiving *transactionHash* a transaction is inserted into merchant's database using the callback method provided to the SDK.
+1. Upon receiving *transactionHash* 
+This means that the transaction is pending on the blockchain. Then a local blockchain-transaction is created in merchant's database using the callback method provided to the SDK. We do this to have a lookup database for the blockchain transactions for faster querying.
 ```
-let typeID = Globals.GET_TRANSACTION_TYPE_ENUM().execute;
 await transactionController.createTransaction(<ITransactionInsert>{
     hash: hash,
     typeID: typeID,
     paymentID: pullPayment.id,
     timestamp: Math.floor(new Date().getTime() / 1000)
 });
+```
+2. Upon receiving *receipt* 
+This means that the transaction is either completed or reverted on the blockchain. We check if the *receipt.status* is true and reduce *numberOfPayments*, adjust *lastPaymentDate* and *nextPaymentDate* set the status and update the PullPayment and the blockchain-transaction.
+
+```
+if (receipt.status) {
+    numberOfPayments = numberOfPayments - 1;
+    lastPaymentDate = Math.floor(new Date().getTime() / 1000); // TODO: get from BC ?
+    nextPaymentDate = Number(pullPayment.nextPaymentDate) + Number(pullPayment.frequency);
+    executeTxStatusID = Globals.GET_TRANSACTION_STATUS_ENUM().success;
+    statusID = numberOfPayments == 0 ? Globals.GET_PULL_PAYMENT_STATUS_ENUM().done : Globals.GET_PULL_PAYMENT_STATUS_ENUM()[pullPayment.status]
+} else {
+    executeTxStatusID = Globals.GET_TRANSACTION_STATUS_ENUM().failed;
+}
+
+await new PullPaymentController().updatePullPayment(<IPullPaymentUpdate>{
+    id: pullPayment.id,
+    numberOfPayments: numberOfPayments,
+    lastPaymentDate: lastPaymentDate,
+    nextPaymentDate: nextPaymentDate,
+    statusID: statusID
+});
+
+await new TransactionController().updateTransaction(<ITransactionUpdate>{
+    hash: transactionHash,
+    statusID: executeTxStatusID
+});
+```
+Then we check we check if the payment is done and cash out all the PMA's and ETH back to treasury (refer to [cash out] (#cashing-out-eth-and-pma))
+```
+if (numberOfPayments === 0) { // Payment is done, time to cash out.
+    const cashOutController = new CashOutController();
+    await cashOutController.cashOutPMA(pullPayment.id);
+    await cashOutController.cashOutETH(pullPayment.id);
+}
+```
+Even if payment is not done, we provide an optional cash out service based on `automatedCashOut`.
+```
+if (pullPayment.automatedCashOut && receipt.status) {
+    await new CashOutController().cashOutPMA(pullPaymentID);
+}
 ```
 
 ### Technical Components
