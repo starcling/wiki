@@ -137,8 +137,11 @@ The following mathematical formula is used to calculate the amount of ETH to be 
 ![Algorithm](https://latex.codecogs.com/svg.latex?1.3\ast((\sum_{n=0}^{a}PullPaymentExecutionFee&plus;TransferFeeForPMA)&plus;TransferFeeForETH))
 
 a = number of payments
+
 PullPaymentExecutionFee = Maximum gas fee that was used in the previous executions
+
 TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transaction
+
 TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
 
 
