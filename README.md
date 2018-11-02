@@ -191,6 +191,18 @@ public getSerializedTx(): string {
     return '0x' + tx.serialize().toString('hex');
 }
 ```
+When the transaction is constructed we send the signed transaction to the blockchain and subscribe to the *transactionHash* and *receipt* events.
+
+Upon receiving *transactionHash* a transaction is inserted into merchant's database using the callback method provided to the SDK.
+```
+let typeID = Globals.GET_TRANSACTION_TYPE_ENUM().execute;
+await transactionController.createTransaction(<ITransactionInsert>{
+    hash: hash,
+    typeID: typeID,
+    paymentID: pullPayment.id,
+    timestamp: Math.floor(new Date().getTime() / 1000)
+});
+```
 
 ### Technical Components
 #### NodeJS
