@@ -2,23 +2,16 @@ var AWS = require('aws-sdk');
 AWS.config.update({region: 'eu-west-1' });
 var kms = new AWS.KMS();
 require('dotenv').config()
-const config = require('./config');
-const params = config.getConfig();
-
-if(!params) {
-  return console.error('No parmaters available for current aws profile');
-}
 
 const privateKeyParams = {
-  KeyId: params.KeyId,
-  Plaintext: params.privateKey
+  KeyId: process.env.AWS_KEY_ID,
+  Plaintext: process.env.MERCHANT_PRIVATE_KEY
 };
 
 const mnemonicParams = {
-  KeyId: params.KeyId,
-  Plaintext: params.mnemonic
+  KeyId: process.env.AWS_KEY_ID,
+  Plaintext: process.env.MERCHANT_MNEMONIC_PHRASE
 };
-console.log(`Starting encryption for ${process.env.AWS_PROFILE} profile`);
 
 const init = async () => {
   let privateKeyCipher, 
@@ -36,7 +29,6 @@ const init = async () => {
 
   console.log(`Encrypted data: 
 
-Profile: ${process.env.AWS_PROFILE.toUpperCase()}
 
 ******************************************************************
 
@@ -44,7 +36,7 @@ PrivateKey: ${privateKeyCipher}
 
 AddAccount call: 
 
-CALL add_account('${params.account}', '${privateKeyCipher}');
+CALL add_account('${process.env.MERCHANT_ADDRESS}', '${privateKeyCipher}');
 
 ------------------------------------------------------------------
 
@@ -52,7 +44,7 @@ Mnemonic: ${mnemonicCipher}
 
 AddMnemonic call: 
 
-CALL add_mnemonic('${params.mnemonicId}', '${mnemonicCipher}');
+CALL add_mnemonic('${process.env.MERCHANT_MNEMONIC_ID}', '${mnemonicCipher}');
 
 ******************************************************************
   `);

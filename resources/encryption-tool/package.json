@@ -4,7 +4,7 @@
   "description": "Helper module for encrypting private keys using the AWS KMS",
   "main": "index.js",
   "scripts": {
-    "encrypt": "export AWS_PROFILE=pre-prod-core-test-iam && rm -f decrypted_keys/preprod_core_test_encrypted_keys.txt && node index.js >> decrypted_keys/preprod_core_test_encrypted_keys.txt"
+    "encrypt": "rm -f encrypted_keys/encrypted_data.txt && node index.js >> encrypted_keys/encrypted_data.txt"
   },
   "author": "PumPay",
   "license": "ISC",

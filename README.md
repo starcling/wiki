@@ -238,18 +238,18 @@ our [here](resources).
 - CORE_API_URL=https://stgcore.pumapay.io/core  # PumaPay core URL
 - MERCHANT_URL=http://localhost:3000            # Merchant server URL
 - PGHOST=postgres_merchant                      # PostgreSQL db host
-- PGUSER=db_user                                # PostgreSQL db user
+- PGUSER=backend_user                             # PostgreSQL db user
 - PGPASSWORD=db_pass                            # PostgreSQL db password
-- PGDATABASE=db_name                            # PostgreSQL db name
+- PGDATABASE=backend_db                         # PostgreSQL db name
 - PGPORT=5432                                   # PostgreSQL db port
 - REDIS_PORT=6379                               # Redis Port
 - REDIS_HOST=merchant_redis                     # Redis Host
 - REDIS_TOKEN=123456789                         # Redis token - AWS Setup
 - ETH_NETWORK=3                                 # Ethereum network - 3 for testnet / 1 for mainnet
 - KEY_DB_HOST=db_host                           # MySQL db host
-- KEY_DB_USER=db_user                           # MySQL db user
+- KEY_DB_USER=keys_user                           # MySQL db user
 - KEY_DB_PASS=db_pass                           # MySQL db password
-- KEY_DB=db_name                                # MySQL db name
+- KEY_DB=keys_db                                # MySQL db name
 - KEY_DB_PORT=3306                              # MySQL db port
 - MNEMONIC_ID=mnemonic_phrase_id                # Mnemonic phrase ID - as stored in MySQL db from the SQL script
 - BALANCE_MONITOR_INTERVAL=21600000             # Time interval in seconds to monitor the balance of the bank wallet account
@@ -262,28 +262,11 @@ our [here](resources).
 ```
 
 #### Setting up PostgreSQL Database
-Install the PostgreSQL Database, preferably on the separate server, and make sure you have the secure connection to the server running the Node project. Create a user and a database, and add credentials to the docker-compose enviroment variables (`PGHOST, PGUSER, PGPASSWORD, PGDATABASE, PGPORT`).
+Install the PostgreSQL Database, preferably on the separate server, and make sure you have the secure connection to the server running the Node project. Create a user called `backend_user`  and a database called `backend_db`, and add postgres host and password to docker-compose enviroment variables (`PGHOST,  PGPASSWORD`).
 
-Grant all privilages to the created user over the database that is going to be used by the backend.
+Grant all privilages to the the `backend_user` on `backend_db` db. 
 
-All the PostgreSQL DB scripts for setting up the PostgreSQL database can be found [here](resources/db).
-
-Before runing the script  make sure  to edit each script and set the correct `PGUSER`. For example:
-```
-The SQL scripts can run as provided but it is highly recommended that database user is changed according to the
-PostgeSQL database that the merchant has setup.
-Example:
-```sql
-ALTER TABLE public.tb_payment_status
-    OWNER to local_user;
-```
-should become
-```
-ALTER TABLE public.tb_payment_status
-    OWNER to your_username;
-```
-
-Than the scripts can be ran one by one or merged into a single script using the tools like Gulp.
+Now you can import the database by importing the db script that can be found [here](resouces/db).
 
 After successfully running the scripts, you should have the database ready.
 
@@ -342,8 +325,6 @@ More commands for docker and docker-compose can be found [here](https://docs.doc
 Your merchant backend server is now running on `http:localhost:3000`
 
 You can check all the available APIs on `http:localhost:3000/api/v2/doc/api/#`
-
-
 
 The complete PumaPay API V2 calls documentation [here](assets/PumaPayMerchantBackendAPIGuide.pdf) and the swagger version of it [here](https://stgmbackend.pumapay.io/merchant/api/v2/doc/api/#).
 
