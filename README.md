@@ -248,7 +248,7 @@ our [here](resources).
 - ETH_NETWORK=3                                 # Ethereum network - 3 for testnet / 1 for mainnet
 - KEY_DB_HOST=db_host                           # MySQL db host
 - KEY_DB_USER=keys_user                           # MySQL db user
-- KEY_DB_PASS=db_pass                           # MySQL db password
+- KEY_DB_PASS=_pass                           # MySQL db password
 - KEY_DB=keys_db                                # MySQL db name
 - KEY_DB_PORT=3306                              # MySQL db port
 - MNEMONIC_ID=mnemonic_phrase_id                # Mnemonic phrase ID - as stored in MySQL db from the SQL script
@@ -262,46 +262,51 @@ our [here](resources).
 ```
 
 #### Setting up PostgreSQL Database
-Install the PostgreSQL Database, preferably on the separate server, and make sure you have the secure connection to the server running the Node project. Create a user called `backend_user`  and a database called `backend_db`, and add postgres host and password to docker-compose enviroment variables (`PGHOST,  PGPASSWORD`).
+Install the PostgreSQL Database, preferably on the separate server, and make sure you have the secure connection to the server running the Node project. 
 
-Grant all privilages to the the `backend_user` on `backend_db` db. 
+Login to the database as a root user, either through the command line or through a client of your choice. We have a good experience using [TeamSql](https://teamsql.io/) database client. 
 
-Now you can import the database by importing the db script that can be found [here](resouces/db).
+Once logged in you need to create add `uuid` extension, add the user `backend_user` , create the database `backend_db` and add privilages to the user over the created database. 
 
-After successfully running the scripts, you should have the database ready.
+Run following commands: 
+
+```
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE DATABASE backend_db;
+CREATE USER backend_user WITH ENCRYPTED PASSWORD 'yourpass';
+GRANT ALL PRIVILEGES ON DATABASE backend_db TO backend_user;
+```
+
+Exit the database and now you should login to the database with the newlly created user. Now we need to import tables and stored procedures. 
+
+Create a user called `backend_user`  and a database called `backend_db`, and add postgres host and password to docker-compose enviroment variables (`PGHOST,  PGPASSWORD`).
+
+Initialize the database by importing the db script that can be found [here](resouces/db).
 
 #### Setting up MySQL Database
 
-It is recommended not to use the root user.  Before initializing the database, please create a user and add the username to the `KEY_DB_USER` variable in the docker-compose file.
-After adding the user, create a database, name as you like, and add the database name to the `KEY_DB` variable in the docker-compose file.
-Make sure to grant all the privileges to the new user over the created database.
+Install the Mysql database, preferablly on the separate server and make sure you have the secure connection to the Node.js server. Since this database will hold sensitive information it recomended to use encrypted MySql database that has a mechanism for encrypting data at rest. We recomend using [Amazon RDS for MySQL](https://aws.amazon.com/rds/mysql/) as it provides data encryption at rest and is easy to integrate with the Amzon  [encryption key management system](https://aws.amazon.com/kms/). 
 
-Preferably mysql instance will run on separate server, that talks to the Node server over secure connection.
-Connection details of the mysql connection should be included in the docker-compose file (`KEY_DB_HOST, KEY_DB_USER, KEY_DB_PASS, KEY_DB_PORT, KEY_DB`)
+**Please not that this database is used to store your account's private keys  which provide access to your funds!**
 
-Make sure that the mysql version supports `keyring_file.so` and `keyring_udf.so` plugin as it is used to encrypt the data.
-
-After you created the user and the databse, you can run initialization scripts that can be found [here](resources/account-db).
-Before starting the intialization make sure to replace all occurences of the example user name (`db_service`) with the username you created and used to create the database.
-You need to change this in all the scripts. After this is done, you can run initialization scripts.
-
-The initialization should be done in the following order.
-* First add stored procedures from [here](resources/account-db/stored-procedures).
-
-* Populate  database by running the scripts from [here](resources/account-db/init)
-
-In order to add the account data the merchant needs to edit  the `/account-db/init/add_data.sql` script and addits own mnemonic and account details. This information is going to be encrypted in the database, so it is recomended that after the server has started you delete the content of these files.
-
-All the MySQL DB scripts for setting up the MySQL database can be found [here](resources/account-db).
-The merchant will need to add their encryption key to the configuration files inside the `init` folder, by executing the following SQL script:
-```sql
-call add_table_keys('ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
+Login to the database as a root user and create the user called `keys_user` and the database called `keys_db`. 
 ```
-In addition the merchants need to add their mnemonic phrase of their HD wallet.
-Note that the mnemonicID should be the same as specified in the docker compose file, and represented in a form of a string.
-```sql
-CALL add_mnemonic('mnemonic_phrase_id', 'merchants hd wallet generated twelve word mnemonic phrase should be placed here', 'ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
+CREATE DATABASE keys_db;
+CREATE USER 'prod_user' IDENTIFIED BY 'password';
+GRANT ALL PRIVILAGES on keys_db.* to keys_user;
 ```
+Update the docker file with the password (`KEY_DB_PASS`)of the `keys_user` and set correct host (`KEY_DB_HOST`).
+
+Prepare the database by importing the script found [here](resources/account-db).
+
+After importing the script you need to add encrypted mnemonic to the database. Backend server supports encryption using [AWS KMS]((https://aws.amazon.com/kms/)). In order to prepare data for insterting to the database, follow the instructions found [here](resources/encryption-tool).
+
+Login to the with database using `keys_user` and run the following command: 
+
+```
+CALL add_mnemonic('mnemonic_phrase', 'encrypted_mnemonic');
+```
+Replace `mnemonic_phrase` with value defined in the docker-compose file (`MNEMONIC_ID`) and `encrypted_mnemonic` with the value created by the [encryption tool](resources/encryption-tool). 
 
 #### Setting up the Redis instance
 Merchant backend needs to connect to a Redis instance through the host and port provided in the docker-compose file  (`REDIS_PORT` and `REDIS_HOST`).
