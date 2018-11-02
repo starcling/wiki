@@ -210,7 +210,7 @@ This means that the transaction is either completed or reverted on the blockchai
 ```
 if (receipt.status) {
     numberOfPayments = numberOfPayments - 1;
-    lastPaymentDate = Math.floor(new Date().getTime() / 1000); // TODO: get from BC ?
+    lastPaymentDate = Math.floor(new Date().getTime() / 1000);
     nextPaymentDate = Number(pullPayment.nextPaymentDate) + Number(pullPayment.frequency);
     executeTxStatusID = Globals.GET_TRANSACTION_STATUS_ENUM().success;
     statusID = numberOfPayments == 0 ? Globals.GET_PULL_PAYMENT_STATUS_ENUM().done : Globals.GET_PULL_PAYMENT_STATUS_ENUM()[pullPayment.status]
@@ -247,6 +247,13 @@ if (pullPayment.automatedCashOut && receipt.status) {
 ```
 
 ### QR Code 
+QR Code is used by the wallet in order to initiate the PullPayment. There are three different methods provided by our SDK for generating the QR Code payload. 
+1. generateQRCode - Method for creating a QR Code payload for PullPayments.
+2. generateEthPushQRCode - Method for creating a QR Code payload for Ethereum push transactions
+3. generateErc20PushQRCode - Method for creating a QR Code payload for ERC20 push transactions
+
+These methods return a JSON payload, and it is up to the frontend application or the UI merchant is using to display a QR image. These are proposed libraries from npm package [qr-image] (https://www.npmjs.com/package/qr-image), [qrcode] (https://www.npmjs.com/package/qrcode).
+
 
 ### Technical Components
 #### NodeJS
