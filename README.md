@@ -134,9 +134,13 @@ If `automatedCashOut == false` the `cashOutFrequency` should be 0 and the mercha
 Each PullPayment account needs to hold enough ETH to pay for the Ethereum transaction fees (gas) when executing a PullPayment. For this reason, whenever a new PullPayment is registered on the blockchain enough ETH are transferred from the gas account to the PullPayment account to allow for all the executions of the PullPayment lifecycle to take place.  
 The following mathematical formula is used to calculate the amount of ETH to be transferred for gas.
 
-![Algorithm](https://latex.codecogs.com/svg.latex?1.3\ast((\sum_{n=0}^{a}PullPaymentExecutionFee)&plus;TransferFeeForPMA&plus;TranferFeeForETH))
+![Algorithm](https://latex.codecogs.com/svg.latex?1.3\ast((\sum_{n=0}^{a}PullPaymentExecutionFee&plus;TransferFeeForPMA)&plus;TransferFeeForETH))
 
 a = number of payments
+PullPaymentExecutionFee = Maximum gas fee that was used in the previous executions
+TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transaction
+TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
+
 
 ### Technical Components
 #### NodeJS
