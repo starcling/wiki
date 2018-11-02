@@ -148,9 +148,10 @@ TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transac
 TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
 
 #### Blockchain Event Listener
-When the SDK is build, blockchain event listener starts monitoring the Ethereum network. Events that are being monitored are related to the PullPayment registration. Each time there is a PullPayment registration on the blockchain, the PumaPayPullPayment smart contract (explained in the previous [Blockchain Components](#blockchain-components) section) emits an event log in the following format `LogPaymentRegistered (address clientAddress, address beneficiaryAddress, string paymentID)`. SDK then validates that a PullPayment has been registered related to the merchant using it based on `paymentID`, and if it is valid the scheduler is started. 
+When the SDK is build, blockchain event listener starts monitoring the Ethereum network. Events that are being monitored are related to the PullPayment registration. Each time there is a PullPayment registration on the blockchain, the PumaPayPullPayment smart contract (explained in the previous [Blockchain Components](#blockchain-components) section) emits an event log in the following format `LogPaymentRegistered (address clientAddress, address beneficiaryAddress, string paymentID)`. SDK then validates that the registered PullPayment is related to the merchant, based on `paymentID`, and if it is valid the scheduler is started.
 
 #### Scheduler
+Scheduler is responsible for executing PullPayments on a frequency specified when creating a PullPayment model. The class itself is a mixture of a `cron-job` based library [node-schedule](https://www.npmjs.com/package/node-schedule) and integrated `setInterval` javascript methods. When the `start()` method is called, 
 
 #### PullPayment Execution
 
