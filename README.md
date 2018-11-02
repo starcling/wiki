@@ -140,18 +140,19 @@ The following mathematical formula is used to calculate the amount of ETH to be 
 ![Algorithm](https://latex.codecogs.com/svg.latex?1.3\ast((\sum_{n=0}^{a}PullPaymentExecutionFee&plus;TransferFeeForPMA)&plus;TransferFeeForETH))
 
 a = number of payments
-
 PullPaymentExecutionFee = Maximum gas fee that was used in the previous executions
-
 TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transaction
-
 TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
 
 #### Blockchain Event Listener
 When the SDK is build, blockchain event listener starts monitoring the Ethereum network. Events that are being monitored are related to the PullPayment registration. Each time there is a PullPayment registration on the blockchain, the PumaPayPullPayment smart contract (explained in the previous [Blockchain Components](#blockchain-components) section) emits an event log in the following format `LogPaymentRegistered (address clientAddress, address beneficiaryAddress, string paymentID)`. SDK then validates that the registered PullPayment is related to the merchant, based on `paymentID`, and if it is valid the scheduler is started.
 
+clientAddress - Ethereum address of the wallet app user
+beneficiaryAddress - Ethereum address of the merchant that is executing the PullPayment
+paymentID - ID of the PullPayment that is related with the merchant.
+
 #### Scheduler
-Scheduler is responsible for executing PullPayments on a frequency specified when creating a PullPayment model. The class itself is a mixture of a `cron-job` based library [node-schedule](https://www.npmjs.com/package/node-schedule) and integrated `setInterval` javascript methods. When the `start()` method is called, 
+Scheduler is responsible for executing PullPayments on a *frequency* specified when creating a PullPayment model. The class itself is a mixture of a `cron-job` based library [node-schedule](https://www.npmjs.com/package/node-schedule) and integrated `setInterval` javascript methods. When the `start()` method is called (explained methods and how they work in our [merchant SDK] (https://github.com/pumapayio/merchant.sdk) git), a `cron-job` is scheduled to start based on a `startTimestamp` defined in the PullPayment. When the time comes for the PullPayment to be executed `executePullPayment()` method is called. After the execution is done a `setInterval` is initiated that calls `executePullPayment()` method with the *frequency* interval basis.
 
 #### PullPayment Execution
 
