@@ -20,6 +20,9 @@ The PumaPay Pull Payment protocol allows recurring payment to occur over the Eth
         - [PullPayment Account](#pullpayment-account)
         - [Cashing out ETH and PMA](#cashing-out-eth-and-pma)
         - [Funding ETH](#funding-eth)
+        - [Blockchain Event Listener](#blockchain-event-listener)
+        - [Scheduler](#scheduler)
+        - [PullPayment Execution](#pullpayment-execution)
     - [Technical Components](#technical-components)
         - [NodeJS](#nodejs)
         - [PostgreSQL Database](#postgresql-database)
@@ -144,6 +147,11 @@ TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transac
 
 TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
 
+#### Blockchain Event Listener
+
+#### Scheduler
+
+#### PullPayment Execution
 
 ### Technical Components
 #### NodeJS
