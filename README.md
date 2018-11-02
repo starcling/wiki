@@ -148,6 +148,7 @@ TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transac
 TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
 
 #### Blockchain Event Listener
+When the SDK is build, blockchain event listener starts monitoring the Ethereum network. Events that are being monitored are related to the PullPayment registration. Each time there is a PullPayment registration on the blockchain, the PumaPayPullPayment smart contract (explained in the previous [Blockchain Components](#blockchain-components) section) emits an event log in the following format 
 
 #### Scheduler
 
