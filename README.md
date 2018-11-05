@@ -352,6 +352,6 @@ You can check all the available APIs on `http:localhost:3000/api/v2/doc/api/#`
 
 
 
-The complete PumaPay API V2 calls documentation [here](assets/PumaPayMerchantBackendAPIGuide.pdf) and the swagger version of it [here](https://prembackend.pumapay.io/api/v2/doc/api/#).
+The complete PumaPay API V2 calls documentation <a href="assets/PumaPayMerchantBackendAPIGuide.pdf" target="_blank">here</a> and the swagger version of it <a href="https://prembackend.pumapay.io/api/v2/doc/api/#" target="_blank">here</a>.
 
 Extended integration guide can be found [here](https://pumapay.io/docs/Merchant-Integration-Guide-1.pdf).
