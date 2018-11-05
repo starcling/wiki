@@ -78,4 +78,4 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fc_get_payment_by_id(uuid)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;

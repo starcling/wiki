@@ -61,4 +61,4 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fc_create_payment_model(uuid, text, text, bigint, bigint, bigint, text, integer, integer, integer, integer, boolean, integer)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;

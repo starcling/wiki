@@ -27,5 +27,5 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fn_get_payment_by_customer_and_payment_model_id(text, uuid)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;
 

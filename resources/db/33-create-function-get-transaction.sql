@@ -42,4 +42,4 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fc_get_transaction(text)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;

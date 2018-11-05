@@ -1,5 +1,5 @@
 DELIMITER $$
-CREATE DEFINER=`db_service`@`localhost` PROCEDURE `get_account`(
+CREATE DEFINER=`MYSQL_USER`@`localhost` PROCEDURE `get_account`(
   IN key_address VARCHAR(300)
 )
 BEGIN

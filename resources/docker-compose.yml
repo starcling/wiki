@@ -1,0 +1,50 @@
+# docker-compose.yml
+version: "3"
+services:
+  merchant_server:
+    image: replace_with_provided_images
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development                                 # development for testnet / production for mainnet
+      - HOST=http://merchant_server_address                  # server host
+      - PORT=3000                                            # server port
+      - CORE_API_URL=https://precore.pumapay.io:8081         # PumaPay core URL
+      - MERCHANT_URL=http://merchant_server_address          # Merchant server URL
+      - PGHOST=PG_HOST                                       # PostgreSQL db host
+      - PGUSER=PG_USER                                       # PostgreSQL db user
+      - PGPASSWORD=PG_PASSWORD                               # PostgreSQL db password
+      - PGDATABASE=PG_DATABASE                               # PostgreSQL db name
+      - PGPORT=5432                                          # PostgreSQL db port
+      - REDIS_PORT=6379                                      # Redis Port
+      - REDIS_HOST=REDIS_HOST                                # Redis Host
+      - REDIS_TOKEN=123456789                                # Redis token - AWS Setup
+      - ETH_NETWORK=3                                        # Ethereum network - 3 for testnet / 1 for mainnet
+      - KEY_DB_HOST=MYSQL_HOST                               # MySQL db host
+      - KEY_DB_USER=MYSQL_USER                               # MySQL db user
+      - KEY_DB_PASS=MYSQL_PASS                               # MySQL db password
+      - KEY_DB=MYSQL_DATABASE                                # MySQL db name
+      - KEY_DB_PORT=3306                                     # MySQL db port
+      - MNEMONIC_ID=AS_IN_DATABASE                           # Mnemonic phrase ID - as stored in MySQL db from the SQL script
+      - BALANCE_MONITOR_INTERVAL=21600000                    # Time interval in seconds to monitor the balance of the bank wallet account
+      - BALANCE_CHECK_THRESHOLD=0.1                          # Threshold which will send an email notifcation to the email provided
+      - SENDGRID_API_KEY=RETRIEVE_ONE_FROM_SENDGRID          # SendGrid API key - is used for sending emails related with wallet balances
+      - BALANCE_CHECK_EMAIL=test@test.test                   # Receiver email for the balance checker - testing environment
+      - BALANCE_CHECK_EMAIL_PROD=test@test.com               # Receiver email for the balance checker - production environment
+      - CORE_API_KEY=API_KEY                                 # API key retrieved after registering to PumaPay core server
+      - MERCHANT_ID=ID                                       # Merchant ID as retrieved from PumaPay core after registration
+      - AWS_ACCESS_KEY_ID=0                                  # AWS security key
+      - AWS_SECRET_ACCESS_KEY=0                              # AWS instance secret access key
+      - AWS_REGION=0                                         # Instance region
+      - AWS_KEY_ID=0                                         # Instance key ID
+      - ENCRYPTION_MODULE=none                               # Specified whether AWS encryption is usedor not (none/AWS)    
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./src/swagger.yml:/usr/src/app/src/swagger.yml
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./package.json:/usr/src/app/package.json
+    depends_on:
+      - postgres_merchant
+    networks:
+      - pumapay_merchant_sdk
+    command: sh -c "npm start"

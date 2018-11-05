@@ -22,4 +22,4 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fc_get_all_payment_models()
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;

@@ -20,4 +20,4 @@ END;
 $BODY$;
 
 ALTER FUNCTION public.fc_delete_transaction(text)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;

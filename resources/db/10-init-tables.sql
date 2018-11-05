@@ -12,7 +12,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_payment_status
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;
 
 CREATE TABLE IF NOT EXISTS public.tb_payment_model_type
 (
@@ -26,7 +26,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_payment_model_type
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;
 
 CREATE TABLE IF NOT EXISTS public.tb_transaction_status
 (
@@ -40,7 +40,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_transaction_status
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;
 
 CREATE TABLE IF NOT EXISTS public.tb_transaction_type
 (
@@ -54,7 +54,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_transaction_type
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;
 
 CREATE TABLE IF NOT EXISTS public.tb_payment_models
 (
@@ -83,7 +83,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_payment_models
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;
 
 CREATE TABLE IF NOT EXISTS public.tb_payments
 (
@@ -115,7 +115,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_payments
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;
 
 CREATE TABLE IF NOT EXISTS public.tb_blockchain_transactions
 (
@@ -143,4 +143,4 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.tb_blockchain_transactions
-    OWNER to local_user;
+    OWNER to POSTGRESQL_USER;

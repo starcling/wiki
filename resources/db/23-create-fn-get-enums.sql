@@ -39,4 +39,4 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fc_get_enums(text)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;

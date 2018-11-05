@@ -204,17 +204,6 @@ merchant's `pma-user-token` that should be used to access the `API key`.
 3.	 The `pma-user-token` needs to be added to the header of the `API key` request `api/v2/generate-api-key`.
 The response gives the `pma-api-key` that is used to communicate to the core server from the backend server.
 
-#### KYC Procedure
-To become fully authorised merchant, you need to go through the KYC procedure. After registration and verification of your email address, an email will be sent describing our KYC procedure in detail and requesting the relevant documents.
-Please make sure to encrypt all of your documents before sending and provide us with the decryption key.
-The encryption/decryption tool we suggest is PGP Desktop.
-Please send the encrypted list of required documents to kyc@pumapay.io
-
-##### Verification process
-1.	We are running the documents through our internal Verification process
-2.	Once approved, we are changing the Merchant’s status to Verified
-3.	Merchant can continue and receives API keys.
-
 **Important:** The `API key` and the `merchantID` **should be noted down** since they will be used later for
 setting up the Merchant NodeJS server.
 
@@ -239,33 +228,38 @@ our [here](resources).
 
 2. Docker configuration
 ```
-- NODE_ENV=development                          # development for testnet / production for mainnet
-- HOST=localhost                                # server host
-- PORT=3000                                     # server port
-- CORE_API_URL=https://stgcore.pumapay.io/core  # PumaPay core URL
-- MERCHANT_URL=http://localhost:3000            # Merchant server URL
-- PGHOST=postgres_merchant                      # PostgreSQL db host
-- PGUSER=db_user                                # PostgreSQL db user
-- PGPASSWORD=db_pass                            # PostgreSQL db password
-- PGDATABASE=db_name                            # PostgreSQL db name
-- PGPORT=5432                                   # PostgreSQL db port
-- REDIS_PORT=6379                               # Redis Port
-- REDIS_HOST=merchant_redis                     # Redis Host
-- REDIS_TOKEN=123456789                         # Redis token - AWS Setup
-- ETH_NETWORK=3                                 # Ethereum network - 3 for testnet / 1 for mainnet
-- KEY_DB_HOST=db_host                           # MySQL db host
-- KEY_DB_USER=db_user                           # MySQL db user
-- KEY_DB_PASS=db_pass                           # MySQL db password
-- KEY_DB=db_name                                # MySQL db name
-- KEY_DB_PORT=3306                              # MySQL db port
-- MNEMONIC_ID=mnemonic_phrase_id                # Mnemonic phrase ID - as stored in MySQL db from the SQL script
-- BALANCE_MONITOR_INTERVAL=21600000             # Time interval in seconds to monitor the balance of the bank wallet account
-- BALANCE_CHECK_THRESHOLD=0.1                   # Threshold which will send an email notifcation to the email provided
-- SENDGRID_API_KEY=RETRIEVE_ONE_FROM_SENDGRID   # SendGrid API key - is used for sending emails related with wallet balances
-- BALANCE_CHECK_EMAIL=test@test.test            # Receiver email for the balance checker - testing environment
-- BALANCE_CHECK_EMAIL_PROD=test@test.test       # Receiver email for the balance checker - production environment
-- CORE_API_KEY=API_KEY_RETRIEVED_FROM_CORE      # API key retrieved after registering to PumaPay core server
-- MERCHANT_ID=MERCHANT_ID_RETRIEVED_FROM_CORE   # Merchant ID as retrieved from PumaPay core after registration
+- NODE_ENV=development                                 # development for testnet / production for mainnet
+      - HOST=http://merchant_server_address                  # server host
+      - PORT=3000                                            # server port
+      - CORE_API_URL=https://precore.pumapay.io:8081         # PumaPay core URL
+      - MERCHANT_URL=http://merchant_server_address          # Merchant server URL
+      - PGHOST=PG_HOST                                       # PostgreSQL db host
+      - PGUSER=PG_USER                                       # PostgreSQL db user
+      - PGPASSWORD=PG_PASSWORD                               # PostgreSQL db password
+      - PGDATABASE=PG_DATABASE                               # PostgreSQL db name
+      - PGPORT=5432                                          # PostgreSQL db port
+      - REDIS_PORT=6379                                      # Redis Port
+      - REDIS_HOST=REDIS_HOST                                # Redis Host
+      - REDIS_TOKEN=123456789                                # Redis token - AWS Setup
+      - ETH_NETWORK=3                                        # Ethereum network - 3 for testnet / 1 for mainnet
+      - KEY_DB_HOST=MYSQL_HOST                               # MySQL db host
+      - KEY_DB_USER=MYSQL_USER                               # MySQL db user
+      - KEY_DB_PASS=MYSQL_PASS                               # MySQL db password
+      - KEY_DB=MYSQL_DATABASE                                # MySQL db name
+      - KEY_DB_PORT=3306                                     # MySQL db port
+      - MNEMONIC_ID=AS_IN_DATABASE                           # Mnemonic phrase ID - as stored in MySQL db from the SQL script
+      - BALANCE_MONITOR_INTERVAL=21600000                    # Time interval in seconds to monitor the balance of the bank wallet account
+      - BALANCE_CHECK_THRESHOLD=0.1                          # Threshold which will send an email notifcation to the email provided
+      - SENDGRID_API_KEY=RETRIEVE_ONE_FROM_SENDGRID          # SendGrid API key - is used for sending emails related with wallet balances
+      - BALANCE_CHECK_EMAIL=test@test.test                   # Receiver email for the balance checker - testing environment
+      - BALANCE_CHECK_EMAIL_PROD=test@test.com               # Receiver email for the balance checker - production environment
+      - CORE_API_KEY=API_KEY                                 # API key retrieved after registering to PumaPay core server
+      - MERCHANT_ID=ID                                       # Merchant ID as retrieved from PumaPay core after registration
+      - AWS_ACCESS_KEY_ID=0                                  # AWS security key
+      - AWS_SECRET_ACCESS_KEY=0                              # AWS instance secret access key
+      - AWS_REGION=0                                         # Instance region
+      - AWS_KEY_ID=0                                         # Instance key ID
+      - ENCRYPTION_MODULE=none                               # Specified whether AWS encryption is usedor not (none/AWS)
 ```
 
 #### Setting up PostgreSQL Database
@@ -303,8 +297,6 @@ Make sure to grant all the privileges to the new user over the created database.
 Preferably mysql instance will run on separate server, that talks to the Node server over secure connection.
 Connection details of the mysql connection should be included in the docker-compose file (`KEY_DB_HOST, KEY_DB_USER, KEY_DB_PASS, KEY_DB_PORT, KEY_DB`)
 
-Make sure that the mysql version supports `keyring_file.so` and `keyring_udf.so` plugin as it is used to encrypt the data.
-
 After you created the user and the databse, you can run initialization scripts that can be found [here](resources/account-db).
 Before starting the intialization make sure to replace all occurences of the example user name (`db_service`) with the username you created and used to create the database.
 You need to change this in all the scripts. After this is done, you can run initialization scripts.
@@ -319,12 +311,12 @@ In order to add the account data the merchant needs to edit  the `/account-db/in
 All the MySQL DB scripts for setting up the MySQL database can be found [here](resources/account-db).
 The merchant will need to add their encryption key to the configuration files inside the `init` folder, by executing the following SQL script:
 ```sql
-call add_table_keys('ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
+call add_account('TREASURY_ADDRESS', 'PRIVATE_KEY');
 ```
 In addition the merchants need to add their mnemonic phrase of their HD wallet.
 Note that the mnemonicID should be the same as specified in the docker compose file, and represented in a form of a string.
 ```sql
-CALL add_mnemonic('mnemonic_phrase_id', 'merchants hd wallet generated twelve word mnemonic phrase should be placed here', 'ENCRYPTION_KEY_DEFINED_BY_MERCHANT');
+CALL add_mnemonic('CREATE_MNEMONIC_PHRASE_ID', 'merchants hd wallet generated twelve word mnemonic phrase should be placed here');
 ```
 
 #### Setting up the Redis instance
@@ -352,6 +344,6 @@ You can check all the available APIs on `http:localhost:3000/api/v2/doc/api/#`
 
 
 
-The complete PumaPay API V2 calls documentation <a href="assets/PumaPayMerchantBackendAPIGuide.pdf" target="_blank">here</a> and the swagger version of it <a href="https://prembackend.pumapay.io/api/v2/doc/api/#" target="_blank">here</a>.
+The complete PumaPay API V2 calls documentation [here](assets/PumaPayMerchantBackendAPIGuide.pdf) and the swagger version of it [here](https://prembackend.pumapay.io/api/v2/doc/api/#).
 
 Extended integration guide can be found [here](https://pumapay.io/docs/Merchant-Integration-Guide-1.pdf).

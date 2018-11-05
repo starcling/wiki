@@ -49,4 +49,4 @@ END
 $BODY$;
 
 ALTER FUNCTION public.fc_create_payment(integer, uuid, integer, bigint, bigint, text, text, text, text)
-    OWNER TO local_user;
+    OWNER TO POSTGRESQL_USER;
