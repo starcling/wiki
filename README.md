@@ -255,11 +255,11 @@ our [here](resources).
       - BALANCE_CHECK_EMAIL_PROD=test@test.com               # Receiver email for the balance checker - production environment
       - CORE_API_KEY=API_KEY                                 # API key retrieved after registering to PumaPay core server
       - MERCHANT_ID=ID                                       # Merchant ID as retrieved from PumaPay core after registration
-      - AWS_ACCESS_KEY_ID=0                                  # AWS security key
-      - AWS_SECRET_ACCESS_KEY=0                              # AWS instance secret access key
-      - AWS_REGION=0                                         # Instance region
-      - AWS_KEY_ID=0                                         # Instance key ID
-      - ENCRYPTION_MODULE=none                               # Specified whether AWS encryption is usedor not (none/AWS)
+      - AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID                  # Used to authenticate to AWS KMS API
+      - AWS_SECRET_ACCESS_KEY=AWS_ACCESS_SECRET              # AWS accesss secret, used to authenticate to AWS KMS API
+      - AWS_REGION=AWS_REGION                                # Region used to create encryption key
+      - ENCRYPTION_MODULE=aws                                # By setting this value to aws, you the server to use AWS for decrypting data, using "none" assumes no encryption is present and will use data as received from the db. 
+      - AWS_KEY_ID=AWS_KEY_ID                                # ID of the key used to encrypt mnemonic
 ```
 
 #### Setting up PostgreSQL Database
