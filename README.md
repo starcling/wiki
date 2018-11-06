@@ -328,6 +328,8 @@ Node project is running.
 #### Start docker containers
 Once the merchant backend system and all configurations are in place you can start the nodeJS server, which will start and automatically download all of the missing dependencies
 ```
+# Prepare the server
+docker-compose build
 # Start the node js server
 docker-compose up -d
 # Check the logs of the running containers
