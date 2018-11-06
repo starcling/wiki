@@ -1,0 +1,17 @@
+{
+    "name": "puma-pay-encryption-module",
+    "version": "1.0.0",
+    "description": "Helper module for encrypting private keys using the AWS KMS",
+    "main": "index.js",
+    "scripts": {
+      "encrypt": "rm -f encrypted_keys/encrypted_data.txt && node index.js >> encrypted_keys/encrypted_data.txt"
+    },
+    "author": "PumPay",
+    "license": "ISC",
+    "dependencies": {
+      "aws-sdk": "^2.336.0",
+      "crypto": "^1.0.1",
+      "dotenv": "^6.1.0",
+      "node-env": "^0.1.6"
+    }
+  }
