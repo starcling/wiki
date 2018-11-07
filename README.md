@@ -302,9 +302,8 @@ Before starting the intialization make sure to replace all occurences of the exa
 You need to change this in all the scripts. After this is done, you can run initialization scripts.
 
 The initialization should be done in the following order.
-* First add stored procedures from [here](resources/account-db/stored-procedures).
 
-* Populate  database by running the scripts from [here](resources/account-db/init)
+* Populate  database by running the scripts from [here](resources/account-db/)
 
 In order to add the account data the merchant needs to edit  the `/account-db/init/add_data.sql` script and addits own mnemonic and account details. This information is going to be encrypted in the database, so it is recomended that after the server has started you delete the content of these files.
 
