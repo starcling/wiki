@@ -1,16 +1,16 @@
-USE  'keys_db';
+USE  ‘name_your_keys_database’;
 
 /***CREATING ALL TABLES*/
 CREATE TABLE account (
   id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
   address VARCHAR (100) UNIQUE NOT NULL,
-  privateKey VARCHAR (2000) NULL
+  privateKey VARCHAR (1000) NULL
 );
 
 CREATE TABLE mnemonics
 (
   id VARCHAR(255) PRIMARY KEY NOT NULL,
-  mnemonic VARCHAR(2000) UNIQUE NOT NULL
+  mnemonic VARCHAR(1000) UNIQUE NOT NULL
 );
 
 DELIMITER $$
@@ -31,7 +31,7 @@ DELIMITER $$
 CREATE DEFINER=`keys_user` PROCEDURE `add_mnemonic`
 (
   IN id VARCHAR (255), 
-  IN mnemonic VARCHAR (2000)
+  IN mnemonic VARCHAR (1000)
 )
 BEGIN
   INSERT INTO mnemonics
@@ -88,5 +88,3 @@ if;
 SELECT @accountKey;
 END;;
 DELIMITER ;
-
-
