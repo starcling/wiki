@@ -20,6 +20,10 @@ The PumaPay Pull Payment protocol allows recurring payment to occur over the Eth
         - [PullPayment Account](#pullpayment-account)
         - [Cashing out ETH and PMA](#cashing-out-eth-and-pma)
         - [Funding ETH](#funding-eth)
+        - [Blockchain Event Listener](#blockchain-event-listener)
+        - [Scheduler](#scheduler)
+        - [PullPayment Execution](#pullpayment-execution)
+        - [QR Code](#qr-code)
     - [Technical Components](#technical-components)
         - [NodeJS](#nodejs)
         - [PostgreSQL Database](#postgresql-database)
@@ -136,13 +140,119 @@ The following mathematical formula is used to calculate the amount of ETH to be 
 
 ![Algorithm](https://latex.codecogs.com/svg.latex?1.3\ast((\sum_{n=0}^{a}PullPaymentExecutionFee&plus;TransferFeeForPMA)&plus;TransferFeeForETH))
 
-a = number of payments
+1. a = number of payments
+2. PullPaymentExecutionFee = Maximum gas fee that was used in the previous executions
+3. TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transaction
+4. TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
 
-PullPaymentExecutionFee = Maximum gas fee that was used in the previous executions
+#### Blockchain Event Listener
+When the SDK is build, blockchain event listener starts monitoring the Ethereum network. Events that are being monitored are related to the PullPayment registration. Each time there is a PullPayment registration on the blockchain, the PumaPayPullPayment smart contract (explained in the previous [Blockchain Components](#blockchain-components) section) emits an event log in the following format `LogPaymentRegistered (address clientAddress, address beneficiaryAddress, string paymentID)`. SDK then validates that the registered PullPayment is related to the merchant, based on `paymentID`, and if it is valid the scheduler is started.
 
-TransferFeeForPMA = Gas fee estimation based on a regular ERC20 transfer transaction
+1. clientAddress - Ethereum address of the wallet app user
+2. beneficiaryAddress - Ethereum address of the merchant that is executing the PullPayment
+3. paymentID - ID of the PullPayment that is related with the merchant.
 
-TransferFeeForETH = Gas fee estimation based on a regular ETH transfer transaction
+#### Scheduler
+Scheduler is responsible for executing PullPayments on a *frequency* specified when creating a PullPayment model. The class itself is a mixture of a `cron-job` based library [node-schedule](https://www.npmjs.com/package/node-schedule) and integrated `setInterval` javascript methods. When the `start()` method is called (explained methods and how they work in our [merchant SDK] (https://github.com/pumapayio/merchant.sdk) git), a `cron-job` is scheduled to start based on a `startTimestamp` defined in the PullPayment. When the time comes for the PullPayment to be executed `executePullPayment()` method is called. After the execution is done a `setInterval` is initiated that calls `executePullPayment()` method on the *frequency* interval basis.
+
+#### PullPayment Execution
+Upon execution, first the PullPayment details are retrieved from the merchant database based on `paymentID`. Then we begin to construct the transaction. 
+
+The transaction count is retrieved from blockchain for *merchantAddress*
+```
+const txCount: number = await blockchainHelper.getTxCount(pullPayment.merchantAddress);
+```
+The data for the transaction is the encoded *executePullPayment* method, where the `contract` is our PumaPayPullPayment contract.
+```
+const data: string = contract.methods.executePullPayment(pullPayment.customerAddress, pullPayment.id).encodeABI();
+```
+Gas limit is calculated based on the previous executions
+```
+const gasLimit = await new FundingController().calculateMaxExecutionFee(pullPayment.pullPaymentAddress);
+```
+The `privateKey` for the *merchantAddress* is retrieved from the `getPrivateKey(address)` callback provided by the merchant. Then the transaction is signed using the privateKey 
+```
+let privateKey: string = (await DefaultConfig.settings.getPrivateKey(pullPayment.merchantAddress)).data[0]['@accountKey'];
+const serializedTx: string = await new RawTransactionSerializer(data, pullPayment.pullPaymentAddress, txCount, privateKey, Math.ceil(gasLimit * 1.3)).getSerializedTx();
+privateKey = null;
+        
+public getSerializedTx(): string {
+    const rawTx = {
+        gasPrice: DefaultConfig.settings.web3.utils.toHex(DefaultConfig.settings.web3.utils.toWei('10', 'Gwei')),
+        gasLimit: DefaultConfig.settings.web3.utils.toHex(this.limit),
+        to: this.contractAddress,
+        value: '0x00',
+        data: this.data,
+        nonce: this.txCount
+    };
+    const tx = new TX(rawTx);
+    tx.sign(this.privateKey);
+    this.privateKey = null;
+
+    return '0x' + tx.serialize().toString('hex');
+}
+```
+When the transaction is constructed we send the signed transaction to the blockchain and subscribe to the *transactionHash* and *receipt* events.
+
+1. Upon receiving *transactionHash* -
+This means that the transaction is pending on the blockchain. Then a local blockchain-transaction is created in merchant's database using the callback method provided to the SDK. We do this to have a lookup database for the blockchain transactions for faster querying.
+```
+await transactionController.createTransaction(<ITransactionInsert>{
+    hash: hash,
+    typeID: typeID,
+    paymentID: pullPayment.id,
+    timestamp: Math.floor(new Date().getTime() / 1000)
+});
+```
+2. Upon receiving *receipt* -
+This means that the transaction is either completed or reverted on the blockchain. We check if the *receipt.status* is true and reduce *numberOfPayments*, adjust *lastPaymentDate* and *nextPaymentDate* set the status and update the PullPayment and the blockchain-transaction.
+
+```
+if (receipt.status) {
+    numberOfPayments = numberOfPayments - 1;
+    lastPaymentDate = Math.floor(new Date().getTime() / 1000);
+    nextPaymentDate = Number(pullPayment.nextPaymentDate) + Number(pullPayment.frequency);
+    executeTxStatusID = Globals.GET_TRANSACTION_STATUS_ENUM().success;
+    statusID = numberOfPayments == 0 ? Globals.GET_PULL_PAYMENT_STATUS_ENUM().done : Globals.GET_PULL_PAYMENT_STATUS_ENUM()[pullPayment.status]
+} else {
+    executeTxStatusID = Globals.GET_TRANSACTION_STATUS_ENUM().failed;
+}
+
+await new PullPaymentController().updatePullPayment(<IPullPaymentUpdate>{
+    id: pullPayment.id,
+    numberOfPayments: numberOfPayments,
+    lastPaymentDate: lastPaymentDate,
+    nextPaymentDate: nextPaymentDate,
+    statusID: statusID
+});
+
+await new TransactionController().updateTransaction(<ITransactionUpdate>{
+    hash: transactionHash,
+    statusID: executeTxStatusID
+});
+```
+Then we check we check if the payment is done and cash out all the PMA's and ETH back to treasury (refer to [cash out] (#cashing-out-eth-and-pma))
+```
+if (numberOfPayments === 0) { // Payment is done, time to cash out.
+    const cashOutController = new CashOutController();
+    await cashOutController.cashOutPMA(pullPayment.id);
+    await cashOutController.cashOutETH(pullPayment.id);
+}
+```
+Even if payment is not done, we provide an optional cash out service based on `automatedCashOut`.
+```
+if (pullPayment.automatedCashOut && receipt.status) {
+    await new CashOutController().cashOutPMA(pullPaymentID);
+}
+```
+
+### QR Code 
+QR Code is used by the wallet in order to initiate the PullPayment. There are three different methods provided by our SDK for generating the QR Code payload. 
+1. generateQRCode - Method for creating a QR Code payload for PullPayments.
+2. generateEthPushQRCode - Method for creating a QR Code payload for Ethereum push transactions
+3. generateErc20PushQRCode - Method for creating a QR Code payload for ERC20 push transactions
+
+These methods return a JSON payload, and it is up to the frontend application or the UI merchant is using to display a QR image. These are proposed libraries from npm package [qr-image](https://www.npmjs.com/package/qr-image), [qrcode](https://www.npmjs.com/package/qrcode). For more detailed description of the methods check out our [merchant SDK](https://github.com/pumapayio/merchant.sdk#sdkgenerateqrcode) 
 
 
 ### Technical Components
